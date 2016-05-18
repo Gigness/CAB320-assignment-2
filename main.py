@@ -2,12 +2,13 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+np.set_printoptions(precision=4, suppress=True, threshold=np.inf, linewidth=100)
 # Pandas DataFrame inspection ------------------------------------------------------------------------------------------
 
 records = pd.read_csv("data/records.txt", header=None)  # pd data frame
 
-for col in records:
-    records[col].head()  # print to manually inspect column types
+# for col in records:
+#     records[col].head()  # print to manually inspect column types
 
 # col 1 and 13 listed incorrectly as objects are converted to their correct representation (int64 or float64)
 incorrect_cols = [1, 13]
@@ -40,14 +41,25 @@ for col in records:
     # identify nominal columns as np.objects
     if records[col].dtype == np.object:
         nominal_vals = records[col].unique()
+        print nominal_vals
         mapping = {}
         for i in xrange(len(nominal_vals)):
-            mapping[nominal_vals[i]] = i
-        # records_map[col] = nominal_vals
+            print i
+            mapping[nominal_vals[i]] = i + 1
         records_map[col] = mapping
 
 
-print records_map
+for col in records:
+    if records[col].dtype == np.object:
+        print 'col: ', col, records_map[col]
+        records[col] = records[col].replace(records_map[col])
+
+records.to_csv("data/records_cleaned_integered.txt", index=False, header=None)
+
+records_numpy_array = records.as_matrix()
+np.random.shuffle(records_numpy_array)
+
+print records_numpy_array
 
 # Code Cemetery --------------------------------------------------------------------------------------------------------
 
