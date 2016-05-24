@@ -56,24 +56,41 @@ def map_integers(data_frame):
         # identify nominal columns as np.objects
         if data_frame[col].dtype == np.object:
             nominal_vals = data_frame[col].unique()
-            print nominal_vals
             mapping = {}
             for i in xrange(len(nominal_vals)):
-                print i
                 mapping[nominal_vals[i]] = i + 1
             data_frame_map[col] = mapping
 
     for col in data_frame:
         if data_frame[col].dtype == np.object:
-            print 'col: ', col, data_frame_map[col]
             data_frame[col] = data_frame[col].replace(data_frame_map[col])
 
     # write to file for inspection
     data_frame.to_csv("data/data_frame_cleaned_integered.txt", index=False, header=None)
 
-    numpy_data = data_frame.as_matrix()
-    np.random.shuffle(numpy_data)
-    return numpy_data
+    # numpy_data = data_frame.as_matrix()
+    # np.random.shuffle(numpy_data)
+    # return numpy_data
+    # data_frame.to_csv("data/data_frame_shuffled.txt", index=False, header=None)
 
+    return data_frame.sample(frac=1)
+
+def partition_data(data_frame):
+
+    partitioned_data = []
+
+    training_set_num = int(len(data_frame.index) * 0.8)
+    testing_set_num = len(data_frame.index) - training_set_num
+
+    training_set = data_frame.head(training_set_num)
+    testing_set = data_frame.tail(testing_set_num)
+
+    np_training_set = training_set.as_matrix()
+    np_testing_set = testing_set.as_matrix()
+
+    partitioned_data.append(np_training_set)
+    partitioned_data.append(np_testing_set)
+
+    return partitioned_data
 
 
