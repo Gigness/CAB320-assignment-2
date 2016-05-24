@@ -43,6 +43,18 @@ def clean_data(data_frame):
     data_frame.to_csv("data/data_frame_cleaned.txt", index=False, header=None)
 
 
+def get_attributes_np_array(data_frame):
+    attribute_set = []
+    for col in data_frame:
+        if data_frame[col].dtype == np.object:
+            attribute_range = len(data_frame[col].unique())
+            attribute_set.append(attribute_range)
+        else:
+            attribute_set.append(-1)
+    attribute_set = np.asarray(attribute_set)
+    return attribute_set
+
+
 def map_integers(data_frame):
     """
 
@@ -74,6 +86,7 @@ def map_integers(data_frame):
     # data_frame.to_csv("data/data_frame_shuffled.txt", index=False, header=None)
 
     return data_frame.sample(frac=1)
+
 
 def partition_data(data_frame):
 

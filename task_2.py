@@ -40,14 +40,20 @@ from task_1 import *
 
 df = load_records()
 
+attribute_set = get_attributes_np_array(df)
+
 clean_data(df)
 
 df = map_integers(df)
 
 data_sets = partition_data(df)
 
+# np.savetxt("data/training_set.csv", data_sets[0], delimiter=',', fmt='%10.5f')
+# np.savetxt("data/testing_set.csv", data_sets[1], delimiter=',', fmt='%10.5f')
 
-# print numpy_data
+training_set = data_sets[0]
+testing_set = data_sets[1]
+print training_set.shape
+print testing_set.shape
 
-np.savetxt("data/training_set.csv", data_sets[0], delimiter=',', fmt='%10.5f')
-np.savetxt("data/testing_set.csv", data_sets[1], delimiter=',', fmt='%10.5f')
+print attribute_set
