@@ -40,7 +40,7 @@ from task_1 import *
 
 df = load_records()
 
-attribute_set = get_attributes_np_array(df)
+attribute_type = get_attributes_np_array(df)
 
 clean_data(df)
 
@@ -51,9 +51,47 @@ data_sets = partition_data(df)
 # np.savetxt("data/training_set.csv", data_sets[0], delimiter=',', fmt='%10.5f')
 # np.savetxt("data/testing_set.csv", data_sets[1], delimiter=',', fmt='%10.5f')
 
-training_set = data_sets[0]
-testing_set = data_sets[1]
-print training_set.shape
-print testing_set.shape
+train_data = data_sets[0]
+test_data = data_sets[1]
 
-print attribute_set
+# View Training set, testing set and attribute set
+# print train_data.shape
+# print test_data.shape
+# print attribute_type
+
+if False:
+    # Testing numpy array access
+    # access an entire column via splciing
+
+    matrix = np.diag([1, 2, 3, 4])
+    print matrix
+    print matrix[:, 3]
+    print matrix[:, 1]
+
+a = np.array([0, 0, 1, 1])
+
+a_class_1 = 0
+a_class_2 = 0
+a_class = (train_data[:, 15])
+a_class = a_class.astype(int)
+print a_class
+
+print np.bincount(a_class)
+
+for a in a_class:
+    if a == 1:
+        a_class_1 += 1
+    else:
+        a_class_2 += 1
+
+print a_class_1
+print a_class_2
+
+def bayes_classifier(training_set, attribute_type):
+    # Goal attribute
+    pass
+
+
+    # generate frequency table
+
+

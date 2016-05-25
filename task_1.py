@@ -84,7 +84,6 @@ def map_integers(data_frame):
     # np.random.shuffle(numpy_data)
     # return numpy_data
     # data_frame.to_csv("data/data_frame_shuffled.txt", index=False, header=None)
-
     return data_frame.sample(frac=1)
 
 
