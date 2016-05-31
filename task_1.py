@@ -80,11 +80,9 @@ def map_integers(data_frame):
     # write to file for inspection
     data_frame.to_csv("data/data_frame_cleaned_integered.txt", index=False, header=None)
 
-    # numpy_data = data_frame.as_matrix()
-    # np.random.shuffle(numpy_data)
-    # return numpy_data
-    # data_frame.to_csv("data/data_frame_shuffled.txt", index=False, header=None)
-    return data_frame.sample(frac=1)
+    # TODO return shuffled dataframe
+    # return data_frame.sample(frac=1)
+    return data_frame
 
 
 def partition_data(data_frame):
