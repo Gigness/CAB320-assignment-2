@@ -1,5 +1,13 @@
 from task_1 import *
-import scipy  # for gaussian model of continuous variables
+from scipy.stats import norm
+import matplotlib.pyplot as plt
+import math
+
+
+def norm_probability(x, mu, std):
+    pdf_exp = -1*(((x-mu)**2)/(2*(std**2)))
+    prob = (1/(std*np.sqrt(2*np.pi)))*np.exp(pdf_exp)
+    return prob
 
 df = load_records()
 
@@ -60,23 +68,23 @@ a0 = (train_data[:, [0, 15]]).astype(int)
 a_totals = {}
 a_value_count = {}
 p_cond = {}
+p_cond_continuous = {}
 
 class_counter = 0
-for type in attribute_type:
-    if type != -1:
-        entry_name_prob_1 = "a" + str(class_counter) + "_" + "1" + "_"
-        entry_name_prob_2 = "a" + str(class_counter) + "_" + "2" + "_"
-        entry_name_totals = "a" + str(class_counter) + "_"
-        for i in xrange(1, type + 1):
-            totals_entry = entry_name_totals + str(i)
-            cond_prob_1 = entry_name_prob_1 + str(i)
-            cond_prob_2 = entry_name_prob_2 + str(i)
-            a_totals[totals_entry] = 0
-            a_value_count[cond_prob_1] = 0
-            a_value_count[cond_prob_2] = 0
-            p_cond[cond_prob_1] = 0
-            p_cond[cond_prob_2] = 0
-            # print totals_entry
+for a in attribute_type:
+    entry_name_prob_1 = "a" + str(class_counter) + "_" + "1" + "_"
+    entry_name_prob_2 = "a" + str(class_counter) + "_" + "2" + "_"
+    entry_name_totals = "a" + str(class_counter) + "_"
+    for i in xrange(1, a + 1):
+        totals_entry = entry_name_totals + str(i)
+        cond_prob_1 = entry_name_prob_1 + str(i)
+        cond_prob_2 = entry_name_prob_2 + str(i)
+        a_totals[totals_entry] = 0
+        a_value_count[cond_prob_1] = 0
+        a_value_count[cond_prob_2] = 0
+        p_cond[cond_prob_1] = 0
+        p_cond[cond_prob_2] = 0
+        # print totals_entry
     class_counter += 1
 
 # Populate Dictionaries Values -----------------------------------------------------------------------------------------
@@ -90,7 +98,6 @@ for i in xrange(train_data.shape[1]):
         for j in xrange(1, len(column_count)):
             a_totals_key = "a" + str(i) + "_" + str(j)
             a_totals[a_totals_key] = column_count[j]
-
 
 # Populate counts of each attribute ------------------------------------------------------------------------------------
 
@@ -120,9 +127,28 @@ for entry in p_cond:
     prob_a_given_class = float(a_occurrence)/float(a_total)
     p_cond[entry] = prob_a_given_class
 
+# mean_a1 = np.mean(train_data[:, 1])
+# stdev_a1 = np.std(train_data[:, 1])
+#
+#
+# a1_max = math.ceil(max(train_data[:, 1]))
+# a1_min = math.floor(min(train_data[:, 1]))
+# x = np.linspace(a1_min, a1_max, 100)
+#
+# norm_dist = norm(mean_a1, stdev_a1)
+# p = norm.pdf(x, mean_a1, stdev_a1)
+#
+# print norm_probability(20, mean_a1, stdev_a1)
+# print norm_dist.pdf(20)
+# print norm_dist.pdf(30)
+# print norm_dist.pdf(70)
+# print norm_dist.pdf(80)
+#
+# plt.hist(train_data[:, 1], bins=25, normed=True, alpha=0.6, color='g')
+# plt.plot(x, p, 'k', linewidth=2)
+# plt.show()
 
 
-
-print attribute_type
+# Process continuous data ----------------------------------------------------------------------------------------------
 
 
