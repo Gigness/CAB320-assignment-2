@@ -15,7 +15,6 @@ clean_data(df)
 
 attribute_type = get_attributes_np_array(df)
 
-
 df = map_integers(df)
 
 data_sets = partition_data(df)
@@ -61,14 +60,15 @@ count_a15 = np.bincount(a15)
 p_a15_1 = count_a15[1]/num_rows
 p_a15_2 = count_a15[2]/num_rows
 
-# probabilities for a0
-a0 = (train_data[:, [0, 15]]).astype(int)
 
 # Populate Dictionaries Entries ----------------------------------------------------------------------------------------
 a_totals = {}
 a_value_count = {}
 p_cond = {}
 mu_sigma_cont = {}
+
+results_correct = []
+results_false = []
 
 class_counter = 0
 for type in attribute_type:
@@ -142,10 +142,8 @@ for entry in p_cond:
 
 # Populate mu sigma dictionary for continuous values -------------------------------------------------------------------
 
-# TODO Testing data from mu sigma cont
-
-a1_1_vals = []
-a1_2_vals = []
+# a1_1_vals = []
+# a1_2_vals = []
 
 for i in xrange(train_data.shape[1]):
     if attribute_type[i] == -1:
@@ -153,7 +151,6 @@ for i in xrange(train_data.shape[1]):
         key_mu_2 = "a" + str(i) + "_2" + "_mu"
         key_sigma_1 = "a" + str(i) + "_1" + "_sigma"
         key_sigma_2 = "a" + str(i) + "_2" + "_sigma"
-
 
         column = train_data[:, [i, 15]]
         c1_data = np.array([])
@@ -177,6 +174,81 @@ for i in xrange(train_data.shape[1]):
         mu_sigma_cont[key_mu_2] = mu2
         mu_sigma_cont[key_sigma_1] = sigma1
         mu_sigma_cont[key_sigma_2] = sigma2
+
+# Run Test -------------------------------------------------------------------------------------------------------------
+
+wrong_predictions = 0
+results = open("results.txt", 'w')
+for row in test_data:
+
+    # write test case to file
+    for attribute in row:
+        results.write(str(attribute) + ",")
+
+    p_1 = p_a15_1 * 1E30
+    p_2 = p_a15_2 * 1E30
+    for i in xrange(len(attribute_type)):
+        if i == 15:
+            # Check if guessed correctly
+            if p_1 > p_2:
+                results.write(" [ + ] ")
+                if row[i] != 1:
+                    results.write(" [WRONG]")
+                    wrong_predictions += 1
+            elif p_2 > p_1:
+                results.write(" [ - ] ")
+                if row[i] != 2:
+                    results.write(" [WRONG]")
+                    wrong_predictions += 1
+            else:
+                results.write(" [ ? ] ")
+        if attribute_type[i] == -1:
+            # p(a | c) of continuous value
+
+            # get condition probability variables from p_cond
+            key_mu_1 = "a" + str(i) + "_1_mu"
+            key_sigma_1 = "a" + str(i) + "_1_sigma"
+            key_mu_2 = "a" + str(i) + "_2_mu"
+            key_sigma_2 = "a" + str(i) + "_2_sigma"
+
+            p_cond_1 = norm_probability(row[i], mu_sigma_cont[key_mu_1], mu_sigma_cont[key_sigma_1])
+            p_cond_2 = norm_probability(row[i], mu_sigma_cont[key_mu_2], mu_sigma_cont[key_sigma_2])
+
+            p_1 *= p_cond_1
+            p_2 *= p_cond_2
+
+            # TODO for debugging
+            print "p_1: ", p_cond_1
+            print "p_2: ", p_cond_2
+            print ""
+
+        else:
+            # p(a | c) of discrete value
+            key_1 = "a" + str(i) + "_1_" + str(int(row[i]))
+            key_2 = "a" + str(i) + "_2_" + str(int(row[i]))
+
+            p_cond_1 = p_cond[key_1]
+            p_cond_2 = p_cond[key_2]
+
+            p_1 *= p_cond_1
+            p_2 *= p_cond_2
+
+            # TODO for debugging
+            # print "p_1: ", p_cond_1
+            # print "p_2: ", p_cond_2
+            # print ""
+
+    results.write(" [+: " + str(p_1) + "] ")
+    results.write(" [-: " + str(p_2) + "] \n")
+
+results.close()
+
+print wrong_predictions
+print len(test_data)
+
+
+
+
 
 # Test mu sigma values -------------------------------------------------------------------------------------------------
 
