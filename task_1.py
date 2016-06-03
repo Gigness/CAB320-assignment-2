@@ -81,8 +81,8 @@ def map_integers(data_frame):
     data_frame.to_csv("data/data_frame_cleaned_integered.txt", index=False, header=None)
 
     # TODO return shuffled dataframe
-    # return data_frame.sample(frac=1)
-    return data_frame
+    return data_frame.sample(frac=1)
+    # return data_frame
 
 
 def partition_data(data_frame):
