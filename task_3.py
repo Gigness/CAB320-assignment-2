@@ -13,19 +13,33 @@ from task_1 import *
 CLASS_INDEX = 15
 PLUS = 1
 MINUS = 2
+MAX_DEPTH = 3
 
 class node:
     #init will be used when constructing the tree with training data
-    def __init__(self, data, parent=None):
+    def __init__(self, data, parent=None, depth = 0):
         
         self.parent = parent
-        
+        self.depth = depth
+        print "New node at depth ", depth      
+        print data
         #Get the number of pluses to the number of minuses
         self.plus_minus_ratio = get_plus_minus_ratio(data)
+        
+        print "ratio", self.plus_minus_ratio
         
         #test if it is all pluses and all minuses, and label the node as such
         self.is_plus_leaf = (self.plus_minus_ratio[1] == 0)
         self.is_minus_leaf = (self.plus_minus_ratio[0] == 0)
+        
+        if depth > MAX_DEPTH:
+            self.is_plus_leaf = self.plus_minus_ratio[1] <= self.plus_minus_ratio[0]
+            self.is_minus_leaf = self.plus_minus_ratio[0] <= self.plus_minus_ratio[1]
+        
+        if self.is_plus_leaf:
+            print "PLUS LEAF"
+        if self.is_minus_leaf:
+            print "PLUS LEAF"
         
         #If it isn't a leaf node, begin splitting operation        
         if(not self.is_plus_leaf and not self.is_minus_leaf):
@@ -36,24 +50,35 @@ class node:
             #save the highest split as we go            
             optimal_split = []
             
-            #loop through each of the attributes 
-            for index in range(14):
+            #save the highest split as we go            
+            self.optimal_attribute = 0
+            
+            #loop through each of the 14 attributes 
+            for index in range(15):
                 
                 #get an array of 2 numpy arrays. The result of a split by
                 #the current attribute
+                print "splitting by index: ", index
                 split = split_by_attribute(data, index)
 
                 #calculate the information gain of the split
                 info_gain = get_info_gain(split, data)
+                
+                print "info gain for this split ", info_gain
 
                 #if it is the current highest, save the split                
-                if(info_gain > highest_info_gain):
+                if info_gain > highest_info_gain:
                     highest_info_gain == info_gain
                     optimal_split = split
-                
-            print optimal_split[0]
-            print "++++++++++++++++++++++++"
-            print optimal_split[1]
+                    self.optimal_attribute = index
+            print "best vaue to split on: ", self.optimal_attribute
+            print "+++++++++++++++"
+            print "Creating left node"
+            self.left_node = node(optimal_split[0], self, self.depth + 1)
+            print "+++++++++++++++"
+            print "creating right node"
+            self.right_node = node(optimal_split[1], self, self.depth + 1)
+
             
             
                     
@@ -89,6 +114,11 @@ def gaussian(values):
 #Input: A numpy array of probabilities
 #Output: a single float representing entropy
 def entropy(ratio): 
+    
+    #If any of the values are zero, we know that there is no entropy
+    if 0 in ratio:
+        return 0
+        
     total = np.sum(ratio)
     probability = ratio/float(total)
     entropy = np.sum(np.log2(probability) * probability *-1)
@@ -102,8 +132,13 @@ def entropy(ratio):
 def get_info_gain(new_split, old_data):
     ratio_old_data = get_plus_minus_ratio(old_data)
     ratio_split1 = get_plus_minus_ratio(new_split[0])
+    print "ratio in split 1 ", ratio_split1
     ratio_split2 = get_plus_minus_ratio(new_split[1])
-    new_entropy = (len(new_split[0])/len(old_data)) * entropy(ratio_split1) + (len(new_split[1])/len(old_data)) * entropy(ratio_split2)
+    print "ratio in split 2 ", ratio_split2
+
+
+
+    new_entropy = (float(len(new_split[0]))/len(old_data)) * entropy(ratio_split1) + (float(len(new_split[1]))/len(old_data)) * entropy(ratio_split2)
     ig = entropy(ratio_old_data) - new_entropy
     return ig
 
@@ -147,7 +182,10 @@ mydata = np.array(([1,30.83,0.0,1,1,1,1,1.25,1,1,1,1,1,202.0,0,1],
     [2,24.75,13.665,1,1,2,2,1.5,2,2,0,1,1,280.0,1,2],
     [1,48.75,26.335,2,2,13,4,0.0,1,2,0,2,1,0.0,0,2]))
 
-node(mydata)
+decision_tree = node(mydata)
+
+
+
 
 
 
