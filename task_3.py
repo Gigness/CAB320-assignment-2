@@ -9,26 +9,27 @@ import pandas as pd
 import numpy as np
 from task_1 import *
 
-#Some constants to improve readability
+# Some constants to improve readability
 CLASS_INDEX = 15
 PLUS = 1
 MINUS = 2
 MAX_DEPTH = 3
 
+
 class node:
-    #init will be used when constructing the tree with training data
+    # init will be used when constructing the tree with training data
     def __init__(self, data, parent=None, depth = 0):
         
         self.parent = parent
         self.depth = depth
         print "New node at depth ", depth      
         print data
-        #Get the number of pluses to the number of minuses
+        # Get the number of pluses to the number of minuses
         self.plus_minus_ratio = get_plus_minus_ratio(data)
         
         print "ratio", self.plus_minus_ratio
         
-        #test if it is all pluses and all minuses, and label the node as such
+        # test if it is all pluses and all minuses, and label the node as such
         self.is_plus_leaf = (self.plus_minus_ratio[1] == 0)
         self.is_minus_leaf = (self.plus_minus_ratio[0] == 0)
         
@@ -41,32 +42,32 @@ class node:
         if self.is_minus_leaf:
             print "PLUS LEAF"
         
-        #If it isn't a leaf node, begin splitting operation        
+        # If it isn't a leaf node, begin splitting operation        
         if(not self.is_plus_leaf and not self.is_minus_leaf):
 
-            #We will keep track of which split will yield the highest info gain
+            # We will keep track of which split will yield the highest info gain
             highest_info_gain = 0
             
-            #save the highest split as we go            
+            # save the highest split as we go            
             optimal_split = []
             
-            #save the highest split as we go            
+            # save the highest split as we go            
             self.optimal_attribute = 0
             
-            #loop through each of the 14 attributes 
+            # loop through each of the 14 attributes 
             for index in range(15):
                 
-                #get an array of 2 numpy arrays. The result of a split by
-                #the current attribute
+                # get an array of 2 numpy arrays. The result of a split by
+                # the current attribute
                 print "splitting by index: ", index
                 split = split_by_attribute(data, index)
 
-                #calculate the information gain of the split
+                # calculate the information gain of the split
                 info_gain = get_info_gain(split, data)
                 
                 print "info gain for this split ", info_gain
 
-                #if it is the current highest, save the split                
+                # if it is the current highest, save the split                
                 if info_gain > highest_info_gain:
                     highest_info_gain == info_gain
                     optimal_split = split
@@ -84,22 +85,22 @@ class node:
                     
 
 
-#    def split(self):
-#        self.left_node = node(self)
-#        self.right_node = node(self)
-#        return [left_node, right_node]
-#        
-#    def query(self, value):
-#        if value[self.attribute] < self.threshold:
-#            return True
-#        else:
-#            self.child.query(value)
+#     def split(self):
+#         self.left_node = node(self)
+#         self.right_node = node(self)
+#         return [left_node, right_node]
+#         
+#     def query(self, value):
+#         if value[self.attribute] < self.threshold:
+#             return True
+#         else:
+#             self.child.query(value)
             
 
-#Calculates the probability of each element from an array using a gaussian function
-#So far, not needed
-#Input: Takes a numpy.array
-#output: returns an array of probabilities corrosponding to each of the inputs
+# Calculates the probability of each element from an array using a gaussian function
+# So far, not needed
+# Input: Takes a numpy.array
+# output: returns an array of probabilities corrosponding to each of the inputs
 def gaussian(values):
     mean = np.mean(values)
     stddev = np.std(values)
@@ -110,12 +111,12 @@ def gaussian(values):
     return probs
     
 
-#Takes an array of probabilities and returns the entropy
-#Input: A numpy array of probabilities
-#Output: a single float representing entropy
+# Takes an array of probabilities and returns the entropy
+# Input: A numpy array of probabilities
+# Output: a single float representing entropy
 def entropy(ratio): 
     
-    #If any of the values are zero, we know that there is no entropy
+    # If any of the values are zero, we know that there is no entropy
     if 0 in ratio:
         return 0
         
@@ -124,11 +125,11 @@ def entropy(ratio):
     entropy = np.sum(np.log2(probability) * probability *-1)
     return entropy
 
-#Takes a list of two numpy arrays of split data and a numpy array of the original data
-#and calculates the information gain gained from the split
-#Only deals with a binary split at the moment, but can be modified
-#Input: ([numpy array, numpy array], numpy array)
-#Output: a single float representing information gain
+# Takes a list of two numpy arrays of split data and a numpy array of the original data
+# and calculates the information gain gained from the split
+# Only deals with a binary split at the moment, but can be modified
+# Input: ([numpy array, numpy array], numpy array)
+# Output: a single float representing information gain
 def get_info_gain(new_split, old_data):
     ratio_old_data = get_plus_minus_ratio(old_data)
     ratio_split1 = get_plus_minus_ratio(new_split[0])
@@ -142,10 +143,10 @@ def get_info_gain(new_split, old_data):
     ig = entropy(ratio_old_data) - new_entropy
     return ig
 
-#Returns a list of numbers representing plus elements and minus elements in  a given
-#set of data. Needs to be modified to make it numpy friendly (i.e. uses np.where() etc)
-#Input: a numpy array of data
-#ouput: a numpy array of two numbers representing the ratio of pluses to minuses
+# Returns a list of numbers representing plus elements and minus elements in  a given
+# set of data. Needs to be modified to make it numpy friendly (i.e. uses np.where() etc)
+# Input: a numpy array of data
+# ouput: a numpy array of two numbers representing the ratio of pluses to minuses
 def get_plus_minus_ratio(data):
     pluses = 0
     minuses = 0
@@ -156,11 +157,11 @@ def get_plus_minus_ratio(data):
             minuses = minuses+1
     return np.array([pluses, minuses])
 
-#Simply splits a given numpy array of data into two based on the value of the specified index
-#Currently, it merely gets the average of the attribute and splits the data in two depending
-#on which side it falls on the average. Works for binary values, but may need to be refined
-#Input: A numpy array of data and an integer representing to index of the attribute to split on
-#Output: A list of two numpy arrays, representing the two sub array that data was split into
+# Simply splits a given numpy array of data into two based on the value of the specified index
+# Currently, it merely gets the average of the attribute and splits the data in two depending
+# on which side it falls on the average. Works for binary values, but may need to be refined
+# Input: A numpy array of data and an integer representing to index of the attribute to split on
+# Output: A list of two numpy arrays, representing the two sub array that data was split into
 def split_by_attribute(data, attribute_index):
     threshold = np.average(data[:,attribute_index])  
     split1 = data[np.where(data[:,attribute_index] < threshold)]
