@@ -92,7 +92,7 @@ class Node:
         elif data[self.optimal_attribute] < self.threshold:
             return self.left_Node.query(data)
         elif data[self.optimal_attribute] >= self.threshold:
-            return self.left_Node.query(data)
+            return self.right_Node.query(data)
     
     #This will be the function that takes an entire array and outputs
     #an array of 1's or 2's corrosoponding to pluses or minuses
