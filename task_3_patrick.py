@@ -6,6 +6,9 @@ Created on Tue May 31 16:55:22 2016
 """
 
 from task_1 import *
+import numpy as np
+
+    
 
 # Constants ------------------------------------------------------------------------------------------------------------
 CLASS_INDEX = 15
@@ -26,6 +29,9 @@ class Node:
         # test if it is all pluses and all minuses, and label the Node as such
         self.is_plus_leaf = (self.plus_minus_ratio[1] == 0)
         self.is_minus_leaf = (self.plus_minus_ratio[0] == 0)
+        
+        if self.is_plus_leaf: print "Created plus leaf at depth ", depth
+        if self.is_minus_leaf: print "created minus leaf at depth ", depth
         #If the tree reached its maximum depth, designate it as a plas or minus
         #depending on which the mode of the data
         if depth > MAX_DEPTH:
@@ -39,17 +45,18 @@ class Node:
             optimal_split = []
             # loop through each of the 14 attributes
             for index in range(15):
-                
+
                 #Test for every possible split on continuous values
                 #Get an array of values x(i) + ( x(i+1) - x(i) )/2
                 values = np.sort(data[:,index])
-                operand = np.delete(attribute, 0)
-                operand = np.append(minus, minus[-1])
-                threshold_values = ((minus - attribute)/2)+ attribute
+                operand = np.delete(values, 0)
+                operand = np.append(operand, operand[-1])
+                threshold_values = ((operand - values)/2)+ values
                 
                 for thresh in threshold_values:
+
                     split = split_by_attribute(data, index, thresh)
-                    info_gain = get_info_gain(split, data)
+                    info_gain = get_info_gain(split, data)                  
                     
                     if info_gain > highest_info_gain:
                         self.threshold = thresh
@@ -71,25 +78,20 @@ class Node:
 #                    highest_info_gain = info_gain
 #                    optimal_split = split
 #                    self.optimal_attribute = index
+
             self.left_Node = Node(optimal_split[0], self, self.depth + 1)
             self.right_Node = Node(optimal_split[1], self, self.depth + 1)
 
 
     #We will use query when classifying the testing data
     def query(self, data):
-        print "======================"
-        print "testing ", data
         if self.is_plus_leaf:
-            print "PLUS"
             return 1
         elif self.is_minus_leaf:
-            print "MINUS"
             return 2
         elif data[self.optimal_attribute] < self.threshold:
-            print "index ", self.optimal_attribute, ":", data[self.optimal_attribute],  "is less than", self.threshold, "so going to left node"
             return self.left_Node.query(data)
         elif data[self.optimal_attribute] >= self.threshold:
-            print "index ", self.optimal_attribute, ":", data[self.optimal_attribute], "is greater than", self.threshold, "so going to right node"
             return self.left_Node.query(data)
     
     #This will be the function that takes an entire array and outputs
