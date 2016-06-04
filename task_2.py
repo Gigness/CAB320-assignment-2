@@ -2,6 +2,7 @@ from task_1 import *
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 import math
+import time
 
 
 def norm_probability(x, mu, std):
@@ -175,117 +176,87 @@ for i in xrange(train_data.shape[1]):
         mu_sigma_cont[key_sigma_1] = sigma1
         mu_sigma_cont[key_sigma_2] = sigma2
 
-# Run Test -------------------------------------------------------------------------------------------------------------
+# Testing --------------------------------------------------------------------------------------------------------------
 
-wrong_predictions = 0
-results = open("results.txt", 'w')
-for row in test_data:
 
-    # write test case to file
-    for attribute in row:
-        results.write(str(attribute) + ",")
+def test(data):
 
-    p_1 = p_a15_1 * 1E30
-    p_2 = p_a15_2 * 1E30
-    for i in xrange(len(attribute_type)):
-        if i == 15:
-            # Check if guessed correctly
-            if p_1 > p_2:
-                results.write(" [ + ] ")
-                if row[i] != 1:
-                    results.write(" [WRONG]")
-                    wrong_predictions += 1
-            elif p_2 > p_1:
-                results.write(" [ - ] ")
-                if row[i] != 2:
-                    results.write(" [WRONG]")
-                    wrong_predictions += 1
+    wrong_predictions = 0
+    results = open("results_" + str(int(time.time())) + ".txt", 'w')
+    for row in data:
+
+        # write test case to file
+        for attribute in row:
+            results.write(str(attribute) + ",")
+
+        p_1 = p_a15_1
+        p_2 = p_a15_2
+        for i in xrange(len(attribute_type)):
+            if i == 15:
+                # Check if guessed correctly
+                if p_1 > p_2:
+                    results.write(" [ + ] ")
+                    if row[i] != 1:
+                        results.write(" [WRONG]")
+                        wrong_predictions += 1
+                elif p_2 > p_1:
+                    results.write(" [ - ] ")
+                    if row[i] != 2:
+                        results.write(" [WRONG]")
+                        wrong_predictions += 1
+                else:
+                    results.write(" [ ? ] ")
+            if attribute_type[i] == -1:
+                # p(a | c) of continuous value
+
+                # get condition probability variables from p_cond
+                key_mu_1 = "a" + str(i) + "_1_mu"
+                key_sigma_1 = "a" + str(i) + "_1_sigma"
+                key_mu_2 = "a" + str(i) + "_2_mu"
+                key_sigma_2 = "a" + str(i) + "_2_sigma"
+
+                p_cond_1 = norm_probability(row[i], mu_sigma_cont[key_mu_1], mu_sigma_cont[key_sigma_1])
+                p_cond_2 = norm_probability(row[i], mu_sigma_cont[key_mu_2], mu_sigma_cont[key_sigma_2])
+
+                p_1 *= p_cond_1
+                p_2 *= p_cond_2
+
+                # TODO for debugging
+                # print "p_1: ", p_cond_1
+                # print "p_2: ", p_cond_2
+                # print ""
+
             else:
-                results.write(" [ ? ] ")
-        if attribute_type[i] == -1:
-            # p(a | c) of continuous value
+                # p(a | c) of discrete value
+                key_1 = "a" + str(i) + "_1_" + str(int(row[i]))
+                key_2 = "a" + str(i) + "_2_" + str(int(row[i]))
 
-            # get condition probability variables from p_cond
-            key_mu_1 = "a" + str(i) + "_1_mu"
-            key_sigma_1 = "a" + str(i) + "_1_sigma"
-            key_mu_2 = "a" + str(i) + "_2_mu"
-            key_sigma_2 = "a" + str(i) + "_2_sigma"
+                p_cond_1 = p_cond[key_1]
+                p_cond_2 = p_cond[key_2]
 
-            p_cond_1 = norm_probability(row[i], mu_sigma_cont[key_mu_1], mu_sigma_cont[key_sigma_1])
-            p_cond_2 = norm_probability(row[i], mu_sigma_cont[key_mu_2], mu_sigma_cont[key_sigma_2])
+                p_1 *= p_cond_1
+                p_2 *= p_cond_2
 
-            p_1 *= p_cond_1
-            p_2 *= p_cond_2
+                # TODO for debugging
+                # print "p_1: ", p_cond_1
+                # print "p_2: ", p_cond_2
+                # print ""
 
-            # TODO for debugging
-            print "p_1: ", p_cond_1
-            print "p_2: ", p_cond_2
-            print ""
+        results.write(" [+: " + str(p_1) + "] ")
+        results.write(" [-: " + str(p_2) + "] \n")
 
-        else:
-            # p(a | c) of discrete value
-            key_1 = "a" + str(i) + "_1_" + str(int(row[i]))
-            key_2 = "a" + str(i) + "_2_" + str(int(row[i]))
-
-            p_cond_1 = p_cond[key_1]
-            p_cond_2 = p_cond[key_2]
-
-            p_1 *= p_cond_1
-            p_2 *= p_cond_2
-
-            # TODO for debugging
-            # print "p_1: ", p_cond_1
-            # print "p_2: ", p_cond_2
-            # print ""
-
-    results.write(" [+: " + str(p_1) + "] ")
-    results.write(" [-: " + str(p_2) + "] \n")
-
-results.close()
-
-print wrong_predictions
-print len(test_data)
+    print "Wrong results: ", wrong_predictions
+    print "Dataset size: ", len(data)
+    print "Accuracy: " + str((1 - float(wrong_predictions) / len(data)) * 100) + "%\n\n"
 
 
+# Main -----------------------------------------------------------------------------------------------------------------
+
+if __name__ == '__main__':
+    # test training set
+    print "Bayes classifier on: training set"
+    test(train_data)
+    print "Bayes classifier on: testing set"
+    test(test_data)
 
 
-
-# Test mu sigma values -------------------------------------------------------------------------------------------------
-
-
-# Process continuous data ----------------------------------------------------------------------------------------------
-
-# Garbage
-# mean_a1 = np.mean(train_data[:, 1])
-# stdev_a1 = np.std(train_data[:, 1])
-#
-#
-# a1_max = math.ceil(max(train_data[:, 1]))
-# a1_min = math.floor(min(train_data[:, 1]))
-# x = np.linspace(a1_min, a1_max, 100)
-#
-# norm_dist = norm(mean_a1, stdev_a1)
-# p = norm.pdf(x, mean_a1, stdev_a1)
-#
-# print norm_probability(20, mean_a1, stdev_a1)
-# print norm_dist.pdf(20)
-# print norm_dist.pdf(30)
-# print norm_dist.pdf(70)
-# print norm_dist.pdf(80)
-#
-# plt.hist(train_data[:, 1], bins=25, normed=True, alpha=0.6, color='g')
-# plt.plot(x, p, 'k', linewidth=2)
-# plt.show()
-
-# a1_max = math.ceil(max(a1_1_vals))
-# a1_min = math.floor(min(a1_1_vals))
-# x = np.linspace(a1_min, a1_max, 100)
-# mean_a1 = np.mean(a1_1_vals)
-# std_a1 = np.std(a1_1_vals)
-# print mean_a1, mu_sigma_cont["a1_1_mu"]
-# print std_a1, mu_sigma_cont["a1_1_sigma"]
-# p_a1 = norm.pdf(x, mean_a1, std_a1)
-# plt.hist(a1_1_vals, bins=25, normed=True, alpha=0.6)
-# plt.hist(a1_2_vals, bins=25, normed=True, alpha=0.6, color="green")
-# plt.plot(x, p_a1, 'k')
-# plt.show()

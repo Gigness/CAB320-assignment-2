@@ -27,8 +27,8 @@ def ID3(data, attributes):
     elif c2_count == len(data):
         root.classification = 2
         return root
-    elif len(attributes) == 0:
-        # check if no more attributes to split on
+    elif len(attributes) == data.shape[1] - 1:
+        # No more attributes to split on
         # return leaf node with the highest count of classifications
         class_count = data[:, CLASS_INDEX_TEST]
         _, c1_count, c2_count = np.bincount(class_count)
@@ -40,9 +40,51 @@ def ID3(data, attributes):
             raise ValueError("root is null")
         return root
     else:
+        column_count = data.shape[1]
         # Get attribute with highest information gain
+        max_ig = 0
+        max_ig_attribute = -1
 
-        pass
+        entropy_before = entropy(np.array([c1_count, c2_count]))
+        # print entropy_before
+        entropy_values = 0
+        for i in xrange(column_count):
+            # TODO  class index is the last index = 4
+            # print data[:, [i, 4]]
+            single_attr_class = data[:, [i, 4]]
+
+            entropy_attribute(single_attr_class)
+
+            break
+
+
+
+def entropy_attribute(data):
+    """
+
+    :param data: shape of data must be (x, 2)
+    :return:
+    """
+    print data
+    e = 0
+    num_values = max(data[:, 0])
+    val_counts = np.bincount(data[:, 0])
+    print num_values
+    print val_counts
+
+    for val in xrange(num_values):
+        count_1 = 0
+        count_2 = 0
+        # get totals
+        for class_val in data[:, 1]:
+            if class_val == 1:
+                count_1 += 1
+            else:
+                count_2 += 1
+
+
+
+
 
 
 class TreeNode:
@@ -57,7 +99,6 @@ class TreeNode:
     def __repr__(self):
         return "<Node attribute: %s, value: %s, classification: %s>" % (self.attribute, self.value, self.classification)
 
-        
 
 class Node:
     # init will be used when constructing the tree with training data
@@ -167,8 +208,8 @@ def entropy(ratio):
 
     total = np.sum(ratio)
     probability = ratio/float(total)
-    entropy = np.sum(np.log2(probability) * probability *-1)
-    return entropy
+    e = np.sum(np.log2(probability) * probability *-1)
+    return e
 
 
 def get_info_gain(new_split, old_data):
@@ -255,6 +296,8 @@ strong = 2
 yes = 1
 no = 2
 
+attribute_type = [3, 3, 2, 2]
+
 example_data = np.array([
     [sunny, hot, high, weak, no],
     [sunny, hot, high, strong , no],
@@ -274,7 +317,7 @@ example_data = np.array([
 
 # decision_tree = Node(mydata)
 
-node = ID3(example_data, [])
+node = ID3(example_data, [1,2,3])
 
-print node
+# print node
 
