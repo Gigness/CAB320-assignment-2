@@ -83,18 +83,18 @@ class Node:
         if self.is_plus_leaf:
             print "PLUS LEAF"
         if self.is_minus_leaf:
-            print "PLUS LEAF"
+            print "MINUS LEAF"
 
         # If it isn't a leaf Node, begin splitting operation
         if not self.is_plus_leaf and not self.is_minus_leaf:
 
             # We will keep track of which split will yield the highest info gain
-            highest_info_gain = 0
+            highest_info_gain = 0.0
 
             # save the highest split as we go
             optimal_split = []
 
-            # save the highest split as we go
+            # save the highest attribute to split on as we go
             self.optimal_attribute = 0
 
             # loop through each of the 14 attributes
