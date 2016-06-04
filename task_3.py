@@ -9,10 +9,55 @@ from task_1 import *
 
 # Constants ------------------------------------------------------------------------------------------------------------
 CLASS_INDEX = 15
+CLASS_INDEX_TEST = 4
 PLUS = 1
 MINUS = 2
 MAX_DEPTH = 3
 
+
+def ID3(data, attributes):
+    [c1_count, c2_count] = get_plus_minus_ratio(data)
+
+    root = TreeNode()
+
+    if c1_count == len(data):
+        # Check for Pure partition
+        root.classification = 1
+        return root
+    elif c2_count == len(data):
+        root.classification = 2
+        return root
+    elif len(attributes) == 0:
+        # check if no more attributes to split on
+        # return leaf node with the highest count of classifications
+        class_count = data[:, CLASS_INDEX_TEST]
+        _, c1_count, c2_count = np.bincount(class_count)
+        if c1_count >= c2_count:
+            root.classification = 1
+        elif c2_count > c1_count:
+            root.classification = 2
+        if root is None:
+            raise ValueError("root is null")
+        return root
+    else:
+        # Get attribute with highest information gain
+
+        pass
+
+
+class TreeNode:
+
+    def __init__(self, attribute=None, value=None, children=None, depth=0, classification=None):
+        self.attribute = attribute
+        self.value = value
+        self.children = children
+        self.depth = depth
+        self.classification = classification
+
+    def __repr__(self):
+        return "<Node attribute: %s, value: %s, classification: %s>" % (self.attribute, self.value, self.classification)
+
+        
 
 class Node:
     # init will be used when constructing the tree with training data
@@ -161,10 +206,10 @@ def get_plus_minus_ratio(data):
     pluses = 0
     minuses = 0
     for each in data:
-        if each[CLASS_INDEX] == PLUS:
-            pluses = pluses+1
+        if each[CLASS_INDEX_TEST] == PLUS:
+            pluses += 1
         else:
-            minuses = minuses+1
+            minuses += 1
     return np.array([pluses, minuses])
 
 
@@ -186,21 +231,50 @@ def split_by_attribute(data, attribute_index):
 
 # Testing --------------------------------------------------------------------------------------------------------------
 
-mydata = np.array(([1,30.83,0.0,1,1,1,1,1.25,1,1,1,1,1,202.0,0,1],
-    [2,58.67,4.46,1,1,2,2,3.04,1,1,6,1,1,43.0,560,1],
-    [2,24.5,0.5,1,1,2,2,1.5,1,2,0,1,1,280.0,824,1],
-    [1,27.83,1.54,1,1,1,1,3.75,1,1,5,2,1,100.0,3,1],
-    [1,23.42,1.0,1,1,7,1,0.5,2,2,0,2,2,280.0,0,2],
-    [2,15.92,2.875,1,1,2,1,0.085,2,2,0,1,1,120.0,0,2],
-    [2,24.75,13.665,1,1,2,2,1.5,2,2,0,1,1,280.0,1,2],
-    [1,48.75,26.335,2,2,13,4,0.0,1,2,0,2,1,0.0,0,2]))
+mydata = np.array((
+    [1, 30.83, 0.0, 1, 1, 1, 1, 1.25, 1, 1, 1, 1, 1, 202.0, 0, 1],
+    [2, 58.67, 4.46, 1, 1, 2, 2, 3.04, 1, 1, 6, 1, 1, 43.0, 560, 1],
+    [2, 24.5, 0.5, 1, 1, 2, 2, 1.5, 1, 2, 0, 1, 1, 280.0, 824, 1],
+    [1, 27.83, 1.54, 1, 1, 1, 1, 3.75, 1, 1, 5, 2, 1, 100.0, 3, 1],
+    [1, 23.42, 1.0, 1, 1, 7, 1, 0.5, 2, 2, 0, 2, 2, 280.0, 0, 2],
+    [2, 15.92, 2.875, 1, 1, 2, 1, 0.085, 2, 2, 0, 1, 1, 120.0, 0, 2],
+    [2, 24.75, 13.665, 1, 1, 2, 2, 1.5, 2, 2, 0, 1, 1, 280.0, 1, 2],
+    [1, 48.75, 26.335, 2, 2, 13, 4, 0.0, 1, 2, 0, 2, 1, 0.0, 0, 2]))
 
-decision_tree = Node(mydata)
+# Testing data
+sunny = 1
+overcast = 2
+rain = 3
+hot = 1
+mild = 2
+cool = 3
+high = 1
+normal = 2
+weak = 1
+strong = 2
+yes = 1
+no = 2
 
+example_data = np.array([
+    [sunny, hot, high, weak, no],
+    [sunny, hot, high, strong , no],
+    [overcast, hot, high, weak, yes],
+    [rain, mild, high, weak, yes],
+    [rain, cool, normal, weak, yes],
+    [rain, cool, normal, strong, no],
+    [overcast, cool, normal, strong, yes],
+    [sunny, mild, high, weak, no],
+    [sunny, cool, normal, weak, yes],
+    [rain, mild, normal, weak, yes],
+    [sunny, mild, normal, strong, yes],
+    [overcast, mild, high, strong, yes],
+    [overcast, hot, normal, weak, yes],
+    [rain, mild, high, strong, no],
+])
 
+# decision_tree = Node(mydata)
 
+node = ID3(example_data, [])
 
-
-
-
+print node
 
