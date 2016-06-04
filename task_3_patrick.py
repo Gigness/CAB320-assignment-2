@@ -17,92 +17,89 @@ MAX_DEPTH = 300000
 class Node:
     # init will be used when constructing the tree with training data
     def __init__(self, data, parent=None, depth=0):
-
         self.parent = parent
         self.depth = depth
-        print "New Node at depth ", depth
-        print data
-        
-        self.threshold = 0        
-        
+        self.threshold = 0     
+        self.optimal_attribute = 0
         # Get the number of pluses to the number of minuses
         self.plus_minus_ratio = get_plus_minus_ratio(data)
-
-        print "ratio", self.plus_minus_ratio
-
         # test if it is all pluses and all minuses, and label the Node as such
         self.is_plus_leaf = (self.plus_minus_ratio[1] == 0)
         self.is_minus_leaf = (self.plus_minus_ratio[0] == 0)
-
+        #If the tree reached its maximum depth, designate it as a plas or minus
+        #depending on which the mode of the data
         if depth > MAX_DEPTH:
             self.is_plus_leaf = self.plus_minus_ratio[1] <= self.plus_minus_ratio[0]
             self.is_minus_leaf = self.plus_minus_ratio[0] <= self.plus_minus_ratio[1]
-
-        if self.is_plus_leaf:
-            print "PLUS LEAF"
-        if self.is_minus_leaf:
-            print "MINUS LEAF"
-
         # If it isn't a leaf Node, begin splitting operation
         if not self.is_plus_leaf and not self.is_minus_leaf:
-
             # We will keep track of which split will yield the highest info gain
             highest_info_gain = 0.0
-
             # save the highest split as we go
             optimal_split = []
-
-            # save the highest attribute to split on as we go
-            self.optimal_attribute = 0
-
             # loop through each of the 14 attributes
             for index in range(15):
-
-                #Save the threshold to use in the query process
-                self.threshold = np.average(data[:,index])
                 
-                # get an array of 2 numpy arrays. The result of a split by
-                # the current attribute
-                print "splitting by index: ", index
-                split = split_by_attribute(data, index, self.threshold)
-
-                # calculate the information gain of the split
-                info_gain = get_info_gain(split, data)
-
-                print "info gain for this split ", info_gain
-
-                # if it is the current highest, save the split
-                if info_gain > highest_info_gain:
-                    highest_info_gain = info_gain
-                    optimal_split = split
-                    self.optimal_attribute = index
+                #Test for every possible split on continuous values
+                #Get an array of values x(i) + ( x(i+1) - x(i) )/2
+                values = np.sort(data[:,index])
+                operand = np.delete(attribute, 0)
+                operand = np.append(minus, minus[-1])
+                threshold_values = ((minus - attribute)/2)+ attribute
                 
-                print "current highest is index ", self.optimal_attribute, " with ig of ", highest_info_gain
-        
-            print "best vaue to split on: ", self.optimal_attribute
-            print "+++++++++++++++"
-            print "Creating left Node"
+                for thresh in threshold_values:
+                    split = split_by_attribute(data, index, thresh)
+                    info_gain = get_info_gain(split, data)
+                    
+                    if info_gain > highest_info_gain:
+                        self.threshold = thresh
+                        highest_info_gain = info_gain
+                        optimal_split = split
+                        self.optimal_attribute = index
+
+#                #get threshold from which we split
+#                index_threshold = np.average(data[:,index])
+#                
+#                # get an array of 2 numpy arrays. The result of a split by
+#                # the current attribute
+#                split = split_by_attribute(data, index, index_threshold)
+#                # calculate the information gain of the split
+#                info_gain = get_info_gain(split, data)
+#                # if it is the current highest, save the split
+#                if info_gain > highest_info_gain:
+#                    self.threshold = index_threshold
+#                    highest_info_gain = info_gain
+#                    optimal_split = split
+#                    self.optimal_attribute = index
             self.left_Node = Node(optimal_split[0], self, self.depth + 1)
-            print "+++++++++++++++"
-            print "creating right Node"
             self.right_Node = Node(optimal_split[1], self, self.depth + 1)
 
 
     #We will use query when classifying the testing data
     def query(self, data):
+        print "======================"
+        print "testing ", data
         if self.is_plus_leaf:
-            return True
+            print "PLUS"
+            return 1
         elif self.is_minus_leaf:
-            return False
+            print "MINUS"
+            return 2
         elif data[self.optimal_attribute] < self.threshold:
+            print "index ", self.optimal_attribute, ":", data[self.optimal_attribute],  "is less than", self.threshold, "so going to left node"
             return self.left_Node.query(data)
         elif data[self.optimal_attribute] >= self.threshold:
+            print "index ", self.optimal_attribute, ":", data[self.optimal_attribute], "is greater than", self.threshold, "so going to right node"
             return self.left_Node.query(data)
     
     #This will be the function that takes an entire array and outputs
     #an array of 1's or 2's corrosoponding to pluses or minuses
     def test(self, data):
-        return 1
+        classify = np.array([4])
+        for each in data:
+            np.append(classify, self.query(each))
+            print self.query(each)
+        return classify
 
 
 
@@ -155,9 +152,8 @@ def get_info_gain(new_split, old_data):
     """
     ratio_old_data = get_plus_minus_ratio(old_data)
     ratio_split1 = get_plus_minus_ratio(new_split[0])
-    print "ratio in split 1 ", ratio_split1
     ratio_split2 = get_plus_minus_ratio(new_split[1])
-    print "ratio in split 2 ", ratio_split2
+
 
     new_entropy = (float(len(new_split[0]))/len(old_data)) * entropy(ratio_split1) +\
                   (float(len(new_split[1]))/len(old_data)) * entropy(ratio_split2)
@@ -237,7 +233,7 @@ testing_data = np.array(([1,41.42,5.0,1,1,2,2,5.0,1,1,6,2,1,470.0,0,1],
                         [1,32.75,2.335,1,1,8,2,5.75,2,2,0,2,1,292.0,0,2],
                         [2,52.17,0.0,2,2,13,4,0.0,2,2,0,1,1,0.0,0,2]))
 
-print decision_tree.test(test_data)
+print decision_tree.test(testing_data)
 
 
 
