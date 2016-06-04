@@ -1,7 +1,4 @@
 from task_1 import *
-from scipy.stats import norm
-import matplotlib.pyplot as plt
-import math
 import time
 
 
@@ -20,41 +17,17 @@ df = map_integers(df)
 
 data_sets = partition_data(df)
 
+# for inspection of data sets
 np.savetxt("data/training_set.csv", data_sets[0], delimiter=',', fmt='%10.2f')
 np.savetxt("data/testing_set.csv", data_sets[1], delimiter=',', fmt='%10.2f')
 
 train_data = data_sets[0]
 test_data = data_sets[1]
 
-if False:
-    # Testing numpy array access
-    # access an entire column via splciing
-
-    matrix = np.diag([1, 2, 3, 4])
-    print matrix
-    print matrix[:, 3]
-    print matrix[:, 1]
-
-    a = np.array([0, 0, 1, 1])
-
-    a_class_1 = 0
-    a_class_2 = 0
-    a_class = (train_data[:, 15])
-
-    a_1 = (train_data[:, [0, 15]])
-
-    print a_1
-
-    a_class = a_class.astype(int)
-    print a_class
-
-    print np.bincount(a_class)
-
-# building the classifier
+# Begin Bayes Classifier construction ----------------------------------------------------------------------------------
 num_rows = float(train_data.shape[0])
 
 a15 = (train_data[:, 15]).astype(int)
-
 count_a15 = np.bincount(a15)
 
 # class probabilities
@@ -97,10 +70,9 @@ for type in attribute_type:
         mu_sigma_cont[entry_name_cont_sigma1] = 0
         mu_sigma_cont[entry_name_cont_sigma2] = 0
 
-
     class_counter += 1
 
-# Populate Dictionaries Values -----------------------------------------------------------------------------------------
+# Populate Dictionaries: attribute counts ------------------------------------------------------------------------------
 
 for i in xrange(train_data.shape[1]):
 
@@ -143,9 +115,6 @@ for entry in p_cond:
 
 # Populate mu sigma dictionary for continuous values -------------------------------------------------------------------
 
-# a1_1_vals = []
-# a1_2_vals = []
-
 for i in xrange(train_data.shape[1]):
     if attribute_type[i] == -1:
         key_mu_1 = "a" + str(i) + "_1" + "_mu"
@@ -160,12 +129,9 @@ for i in xrange(train_data.shape[1]):
         for row in column:
             if row[1] == 1:
                 c1_data = np.append(c1_data, row[0])
-                # if i == 1:
-                #     a1_1_vals.append(row[0])
             else:
                 c2_data = np.append(c2_data, row[0])
-                # if i == 1:
-                #     a1_2_vals.append(row[0])
+
         mu1 = np.mean(c1_data)
         sigma1 = np.std(c1_data)
         mu2 = np.mean(c2_data)
@@ -176,7 +142,7 @@ for i in xrange(train_data.shape[1]):
         mu_sigma_cont[key_sigma_1] = sigma1
         mu_sigma_cont[key_sigma_2] = sigma2
 
-# Testing --------------------------------------------------------------------------------------------------------------
+# Classify function ----------------------------------------------------------------------------------------------------
 
 
 def test(data):
@@ -208,7 +174,6 @@ def test(data):
                     results.write(" [ ? ] ")
             if attribute_type[i] == -1:
                 # p(a | c) of continuous value
-
                 # get condition probability variables from p_cond
                 key_mu_1 = "a" + str(i) + "_1_mu"
                 key_sigma_1 = "a" + str(i) + "_1_sigma"
@@ -221,11 +186,6 @@ def test(data):
                 p_1 *= p_cond_1
                 p_2 *= p_cond_2
 
-                # TODO for debugging
-                # print "p_1: ", p_cond_1
-                # print "p_2: ", p_cond_2
-                # print ""
-
             else:
                 # p(a | c) of discrete value
                 key_1 = "a" + str(i) + "_1_" + str(int(row[i]))
@@ -236,11 +196,6 @@ def test(data):
 
                 p_1 *= p_cond_1
                 p_2 *= p_cond_2
-
-                # TODO for debugging
-                # print "p_1: ", p_cond_1
-                # print "p_2: ", p_cond_2
-                # print ""
 
         results.write(" [+: " + str(p_1) + "] ")
         results.write(" [-: " + str(p_2) + "] \n")
