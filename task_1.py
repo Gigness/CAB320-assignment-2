@@ -1,12 +1,16 @@
 import pandas as pd
 import numpy as np
 
+# debugging options on numpy arrays ------------------------------------------------------------------------------------
+
 np.set_printoptions(precision=4, suppress=True, threshold=np.inf, linewidth=100)
 
 
 def load_records():
     """
-
+    Loads the records.txt from the data folder
+    Stored in a dataframe.
+    Permission was given to use pandas library for task 1.
     :return: pandas DataFrame
     """
 
@@ -22,9 +26,10 @@ def load_records():
 
 def clean_data(data_frame):
     """
-    
-    :param dataframe:
-    :return:
+    cleans Nan and ? values from the data frame.
+    Writes cleaned data frame to csv for inspection.
+    :param data_frame: records to be cleaned
+    :return: data_frame
     """
     for col in data_frame:
 
@@ -44,6 +49,13 @@ def clean_data(data_frame):
 
 
 def get_attributes_np_array(data_frame):
+    """
+    Gets the attribute types of the records by inspecting each column.
+    -1 is given to continuous values.
+    Integer is given to discrete values where the integer is the number of unique values.
+    :param data_frame:
+    :return: numpy array
+    """
     attribute_set = []
     for col in data_frame:
         if data_frame[col].dtype == np.object:
@@ -57,9 +69,10 @@ def get_attributes_np_array(data_frame):
 
 def map_integers(data_frame):
     """
-
-    :param data_frame:
-    :return:
+    Maps the nominal values to integer values.
+    Shuffles the data.
+    :param: data_frame
+    :return: data_frame
     """
     # store unique nominal values for each column
     data_frame_map = {}
@@ -79,14 +92,16 @@ def map_integers(data_frame):
 
     # write to file for inspection
     data_frame.to_csv("data/data_frame_cleaned_integered.txt", index=False, header=None)
-
-    # TODO return shuffled dataframe
     return data_frame.sample(frac=1)
-    # return data_frame
 
 
 def partition_data(data_frame):
-
+    """
+    Split the data into two data_frames.
+    Partition of size 80/20.
+    :param data_frame:
+    :return: list containing each split data_frames
+    """
     partitioned_data = []
 
     training_set_num = int(len(data_frame.index) * 0.8)
