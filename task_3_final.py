@@ -1,28 +1,23 @@
-# -*- coding: utf-8 -*-
 """
 Created on Tue May 31 16:55:22 2016
 
-@author: Patrick
+@author: Patrick, Paul
 """
 
 from task_1 import *
 import numpy as np
 
     
-
 # Constants ------------------------------------------------------------------------------------------------------------
 CLASS_INDEX = 15
-PLUS = 1
-MINUS = 2
-MAX_DEPTH = 300000
+MIN_DATA_PRUNE = 10
+THRESHOLD_RATIO = 0.75
 
 def entropy(ratio):
     """
-    Takes an array of probabilities and returns the entropy
-    Input: A numpy array of probabilities
-    Output: a single float representing entropy
-    :param ratio:
-    :return:
+    Takes an array of probabilities and returns the entropy 
+    :param: ratio  A numpy array of probabilities
+    :return: a single float representing entropy
     """
     # If any of the values are zero, we know that there is no entropy
     if 0 in ratio:
@@ -45,9 +40,9 @@ def get_info_gain(new_split, old_data):
     :param old_data:
     :return:
     """
-    ratio_old_data = get_plus_minus_ratio(old_data)
-    ratio_split1 = get_plus_minus_ratio(new_split[0])
-    ratio_split2 = get_plus_minus_ratio(new_split[1])
+    ratio_old_data = get_counts(old_data)
+    ratio_split1 = get_counts(new_split[0])
+    ratio_split2 = get_counts(new_split[1])
 
 
     new_entropy = (float(len(new_split[0]))/len(old_data)) * entropy(ratio_split1) +\
@@ -56,7 +51,7 @@ def get_info_gain(new_split, old_data):
     return ig
 
 
-def get_plus_minus_ratio(data):
+def get_counts(data):
     """
     Returns a list of numbers representing plus elements and minus elements in  a given
     set of data. Needs to be modified to make it numpy friendly (i.e. uses np.where() etc)
@@ -123,11 +118,29 @@ class DecisionNode:
 
 def ID3(data):
     root = DecisionNode()
-    plus_minus_ratio = get_plus_minus_ratio(data)    
+    counts = get_counts(data)    
     
-    root.is_plus_leaf = plus_minus_ratio[1] == 0
-    root.is_minus_leaf = plus_minus_ratio[0] == 0
+    root.is_plus_leaf = counts[1] == 0
+    root.is_minus_leaf = counts[0] == 0
     
+    if len(data) < MIN_DATA_PRUNE:
+        if counts[0] >= counts[1]:
+            root.is_plus_leaf = True
+        else:
+            root.is_minus_leaf = True
+    
+    # check if a class dominates the data set
+    if counts[0] > counts[1]:
+        # check if class 1, dominates
+        ratio_class_1 = float(counts[0]) / (counts[0] + counts[1])
+        
+        if ratio_class_1 >= THRESHOLD_RATIO:
+            root.is_plus_leaf = True
+    elif counts[1] > counts[0]:
+        ratio_class_2 = float(counts[1]) / (counts[0] + counts[1])
+        
+        if ratio_class_2 >= THRESHOLD_RATIO:
+            root.is_minus_leaf = True
     
     if not root.is_plus_leaf and not root.is_minus_leaf:
             highest_info_gain = 0.0
@@ -187,6 +200,17 @@ test_data = data_sets[1]
 
 root = ID3(train_data)
 
+results = root.test(train_data)
+hit, miss = [0, 0]
+
+for each in range(len(train_data)):
+    if train_data[each, 15] == results[each]:
+        hit += 1
+    else:
+        miss += 1
+
+print hit, " hits and ", miss, " misses with a total accuracuy of %", (float(hit)/(hit+miss))*100
+
 results = root.test(test_data)
 hit, miss = [0, 0]
 
@@ -197,29 +221,6 @@ for each in range(len(test_data)):
         miss += 1
 
 print hit, " hits and ", miss, " misses with a total accuracuy of %", (float(hit)/(hit+miss))*100
-
-
-#
-#
-#decision_tree = Node(train_data)
-#results = decision_tree.test(train_data)
-#
-#
-#hit = 0
-#miss = 0
-#
-#for each in range(len(train_data)):
-#    if train_data[each, 15] == results[each]:
-#        hit += 1
-#    else:
-#        miss += 1
-#
-#print hit, " hits and ", miss, " misses with a total accuracuy of %", (float(hit)/len(train_data))*100
-
-
-
-
-
 
 
 
